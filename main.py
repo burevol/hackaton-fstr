@@ -4,7 +4,7 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
-from utils import Item
+from utils import Item, send_data
 
 app = FastAPI()
 
@@ -20,15 +20,13 @@ class BadRequestException(Exception):
 @app.post("/submitData/")
 async def submit_data(item: Item):
     try:
-        print(item)
+        id = send_data(jsonable_encoder(item))
     except OperationException as ex:
         return JSONResponse({'status': 503, 'message': ex.args[0]})
     except BadRequestException as ex:
         return JSONResponse({'status': 400, 'message': ex.args[0]})
-    except Exception:
-        pass
     else:
-        return JSONResponse({'status': 200, 'message': 'Отправлено успешно', 'id': 1})
+        return JSONResponse({'status': 200, 'message': 'Отправлено успешно', 'id': id})
 
 
 @app.exception_handler(RequestValidationError)
