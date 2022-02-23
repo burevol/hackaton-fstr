@@ -4,7 +4,7 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
-from utils import Item, send_data
+from utils import Item, send_data, send_image
 
 app = FastAPI()
 
@@ -20,7 +20,12 @@ class BadRequestException(Exception):
 @app.post("/submitData/")
 async def submit_data(item: Item):
     try:
-        id = send_data(jsonable_encoder(item))
+        images_dict = {}
+        for image in item.images:
+            id = send_image(image.url)
+            images_dict[image.title] = id
+
+        id = send_data(jsonable_encoder(item), images_dict)
     except OperationException as ex:
         return JSONResponse({'status': 503, 'message': ex.args[0]})
     except BadRequestException as ex:
