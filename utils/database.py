@@ -7,13 +7,13 @@ import requests
 import utils.config as config
 
 
-# TODO добавить обработку исключений
 def send_data(data, images_dict):
     images = json.dumps(images_dict)
     raw_data = json.dumps(data)
     dt = datetime.now()
-    query = 'INSERT INTO "public"."pereval_added" ("raw_data", "date_added", "images") VALUES (%s, %s, %s) RETURNING id'
-    row_id = execute_query(query, (raw_data, dt, images))
+    query = 'INSERT INTO "public"."pereval_added" ("raw_data", "date_added", "status", "images") VALUES (%s, %s, ' \
+            '%s, %s) RETURNING id '
+    row_id = execute_query(query, (raw_data, dt, 'new', images))
     return row_id
 
 

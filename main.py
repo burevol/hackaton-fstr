@@ -1,3 +1,5 @@
+import psycopg2
+import requests
 import uvicorn
 from fastapi import FastAPI, Request, status
 from fastapi.encoders import jsonable_encoder
@@ -9,29 +11,25 @@ from utils import Item, send_data, send_image
 app = FastAPI()
 
 
-class OperationException(Exception):
-    pass
-
-
-class BadRequestException(Exception):
-    pass
-
-
 @app.post("/submitData/")
 async def submit_data(item: Item):
     try:
         images_dict = {}
         for image in item.images:
-            id = send_image(image.url)
-            images_dict[image.title] = id
+            image_id = send_image(image.url)
+            images_dict[image.title] = image_id
 
-        id = send_data(jsonable_encoder(item), images_dict)
-    except OperationException as ex:
-        return JSONResponse({'status': 503, 'message': ex.args[0]})
-    except BadRequestException as ex:
-        return JSONResponse({'status': 400, 'message': ex.args[0]})
+        pereval_id = send_data(jsonable_encoder(item), images_dict)
+    except (psycopg2.DatabaseError, psycopg2.OperationalError, psycopg2.DataError) as ex:
+        return JSONResponse(status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                            content=jsonable_encoder({'status': 503, 'message': "Ошибка работы с базой данных"}))
+    except (requests.ConnectionError, requests.RequestException):
+        return JSONResponse(status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                            content=jsonable_encoder({'status': 503, 'message': "Не удалось загрузить изображение"}))
     else:
-        return JSONResponse({'status': 200, 'message': 'Отправлено успешно', 'id': id})
+        return JSONResponse(status_code=status.HTTP_200_OK,
+                            content=jsonable_encoder(
+                                {'status': 200, 'message': 'Отправлено успешно', 'id': pereval_id}))
 
 
 @app.exception_handler(RequestValidationError)
