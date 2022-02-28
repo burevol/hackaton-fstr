@@ -1,4 +1,5 @@
 import json
+import logging
 from datetime import datetime
 
 import psycopg2
@@ -8,6 +9,8 @@ import utils.config as config
 
 
 def send_data(data, images_dict):
+    logging.info(config.FSTR_DB_HOST)
+    logging.info(config.FSTR_DB_LOGIN)
     images = json.dumps(images_dict)
     raw_data = json.dumps(data)
     dt = datetime.now()
