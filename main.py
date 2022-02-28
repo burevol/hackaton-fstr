@@ -22,6 +22,7 @@ async def submit_data(item: Item):
 
         pereval_id = send_data(jsonable_encoder(item), images_dict)
     except (psycopg2.DatabaseError, psycopg2.OperationalError, psycopg2.DataError) as ex:
+        logging.error(ex.args[0])
         return JSONResponse(status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                             content=jsonable_encoder({'status': 503, 'message': "Ошибка работы с базой данных"}))
     except (requests.ConnectionError, requests.RequestException):
