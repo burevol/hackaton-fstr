@@ -1,10 +1,10 @@
-#Хакатон ФСТР
+# Хакатон ФСТР
 
-##Развертывание на хостинге
+## Развертывание на хостинге
 
-###Docker-compose
+### Docker-compose
 
-####Формат файла .env
+#### Формат файла .env
 
     FSTR_DB_HOST= #адрес БД
     FSTR_DB_PORT= #Порт БД 
@@ -17,7 +17,11 @@
     docker-compose up -d
 
 ### Docker
-     docker run -e FSTR_DB_HOST=127.0.0.1 -e FSTR_DB_PORT=5432 -e FSTR_LOGIN=postgres -e FSTR_PASS=postgres -p 8000:8000 hackaton-fstr:latest
+     docker build -t hackaton-fstr:latest .
+     docker run -e FSTR_DB_HOST=<адрес БД> -e FSTR_DB_PORT=<Порт БД> -e FSTR_LOGIN=<Логин БД> -e FSTR_PASS=<Пароль БД> -e FSTR_DB_NAME=<Имя БД> -p 8000:8000 hackaton-fstr:latest
 
 #### Адрес интерфейса на хостинге 
     http://46.160.240.126:8000/submitData/
+	
+## Документация Swagger
+    http://46.160.240.126:8000/docs
