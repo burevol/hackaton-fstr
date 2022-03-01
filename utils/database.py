@@ -7,10 +7,11 @@ import requests
 
 import utils.config as config
 
+def get_status(data_id):
+    query = 'SELECT status FROM "public"."pereval_added" WHERE id = %s'
+    result = execute_query(query, (data_id,))
 
 def send_data(data, images_dict):
-    logging.info(config.FSTR_DB_HOST)
-    logging.info(config.FSTR_DB_LOGIN)
     images = json.dumps(images_dict)
     raw_data = json.dumps(data)
     dt = datetime.now()

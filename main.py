@@ -7,13 +7,14 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
-from utils import Item, send_data, send_image
+from utils import Item, send_data, send_image, get_status
 
 app = FastAPI()
 
 
 @app.post("/submitData/")
 async def submit_data(item: Item):
+    """Sends data from mobile app to database"""
     try:
         images_dict = {}
         for image in item.images:
@@ -25,13 +26,40 @@ async def submit_data(item: Item):
         logging.error(ex.args[0])
         return JSONResponse(status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                             content=jsonable_encoder({'status': 503, 'message': "Ошибка работы с базой данных"}))
-    except (requests.ConnectionError, requests.RequestException):
+    except (requests.ConnectionError, requests.RequestException) as ex:
+        logging.error(ex.args[0])
         return JSONResponse(status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                             content=jsonable_encoder({'status': 503, 'message': "Не удалось загрузить изображение"}))
     else:
         return JSONResponse(status_code=status.HTTP_200_OK,
                             content=jsonable_encoder(
                                 {'status': 200, 'message': 'Отправлено успешно', 'id': pereval_id}))
+
+@app.get("/submitData/{data_id}/status/")
+async def get_status(data_id: int):
+    """Get status of selected data instance"""
+    status = get_status(data_id)
+    return JSONResponse(status_code=status.HTTP_200_OK,
+                            content=jsonable_encoder(
+                                {'status': 200, 'id': status}))
+
+
+@app.get("/submitData/{data_id}", response_model=Item)
+async def get_data(data_id: int):
+    """Get data by id"""
+    pass
+
+@app.get("/submitData/")
+async def get_data_by_user(fio: str = None, telephone: str = None, mail:str = None):
+    """Get data by filter"""
+    pass
+
+@app.put("/submitData/{data_id}", response_model=Item)
+async def put_data(data_id: int):
+    """Changet the selected data"""
+    pass
+
+
 
 
 @app.exception_handler(RequestValidationError)
