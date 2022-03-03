@@ -99,6 +99,10 @@ async def get_data(data_id: int):
         logging.error(ex.args[0])
         return JSONResponse(status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                             content=jsonable_encoder({'status': 503, 'message': "Ошибка работы с базой данных"}))
+    except TypeError as ex:
+        logging.error(ex.args[0])
+        return JSONResponse(status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                            content=jsonable_encoder({'status': 503, 'message': "Указанная запись не обнаружена"}))
     else:
         return JSONResponse(status_code=status.HTTP_200_OK,
                             content=jsonable_encoder(raw_data))
