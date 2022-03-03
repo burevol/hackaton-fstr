@@ -1,3 +1,4 @@
+from http.client import responses
 import json
 import logging
 
@@ -9,7 +10,7 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
-from utils import Item, send_data, send_image, get_status, get_data_by_id, get_filtered_data, update_data
+from utils import Item, send_data, send_image, get_status, get_data_by_id, get_filtered_data, update_data, Status, Error
 
 app = FastAPI()
 
@@ -38,7 +39,16 @@ async def submit_data(item: Item):
                                 {'status': 200, 'message': 'Отправлено успешно', 'id': pereval_id}))
 
 
-@app.get("/submitData/{data_id}/status/")
+@app.get("/submitData/{data_id}/status/",
+    responses={
+        200: {
+            "description": "Status of the specified record", "model": Status
+        },
+        503: {
+            "description": "Code and error message", "model": Error
+        }
+    }
+)
 async def get_status_str(data_id: int):
     """Get status of selected data instance"""
     try:

@@ -2,6 +2,12 @@ from typing import Optional, List
 
 from pydantic import BaseModel
 
+class Error(BaseModel):
+    status: str
+    message: str
+
+class Status(BaseModel):
+    status: str
 
 class Coord(BaseModel):
     latitude: str
