@@ -1,4 +1,3 @@
-from http.client import responses
 import json
 import logging
 
@@ -10,12 +9,25 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
-from utils import Item, send_data, send_image, get_status, get_data_by_id, get_filtered_data, update_data, Status, Error
+from utils import Item, send_data, send_image, get_status, get_data_by_id, get_filtered_data, update_data, Status, \
+    Error, SubmitDataResponse
 
 app = FastAPI()
 
 
-@app.post("/submitData/")
+@app.post("/submitData/",
+          responses={
+              200: {
+                  "description": "Status of the posted record", "model": SubmitDataResponse
+              },
+              503: {
+                  "description": "Database error", "model": Error
+              },
+              400: {
+                  "description": "Validation error", "model": Error
+              },
+          }
+          )
 async def submit_data(item: Item):
     """Sends data from mobile app to database"""
     try:
@@ -40,15 +52,18 @@ async def submit_data(item: Item):
 
 
 @app.get("/submitData/{data_id}/status/",
-    responses={
-        200: {
-            "description": "Status of the specified record", "model": Status
-        },
-        503: {
-            "description": "Code and error message", "model": Error
-        }
-    }
-)
+         responses={
+             200: {
+                 "description": "Status of the specified record", "model": Status
+             },
+             503: {
+                 "description": "Database error", "model": Error
+             },
+             400: {
+                 "description": "Validation error", "model": Error
+             },
+         }
+         )
 async def get_status_str(data_id: int):
     """Get status of selected data instance"""
     try:
@@ -63,7 +78,19 @@ async def get_status_str(data_id: int):
                                 {'status': status_str}))
 
 
-@app.get("/submitData/{data_id}", response_model=Item)
+@app.get("/submitData/{data_id}", response_model=Item,
+         responses={
+             200: {
+                 "description": "Raw data", "model": Item
+             },
+             503: {
+                 "description": "Database error", "model": Error
+             },
+             400: {
+                 "description": "Validation error", "model": Error
+             },
+         }
+         )
 async def get_data(data_id: int):
     """Get data by id"""
     try:
@@ -77,7 +104,19 @@ async def get_data(data_id: int):
                             content=jsonable_encoder(raw_data))
 
 
-@app.get("/submitData/")
+@app.get("/submitData/",
+         responses={
+             200: {
+                 "description": "Raw data", "model": Item
+             },
+             503: {
+                 "description": "Database error", "model": Error
+             },
+             400: {
+                 "description": "Validation error", "model": Error
+             },
+         }
+         )
 async def get_data_by_user(fio: str = None, telephone: str = None, mail: str = None):
     """Get data by filter"""
     try:
@@ -91,7 +130,19 @@ async def get_data_by_user(fio: str = None, telephone: str = None, mail: str = N
                             content=jsonable_encoder(raw_data))
 
 
-@app.put("/submitData/{data_id}", response_model=Item)
+@app.put("/submitData/{data_id}", response_model=Item,
+         responses={
+             200: {
+                 "description": "Raw data", "model": Item
+             },
+             503: {
+                 "description": "Database error", "model": Error
+             },
+             400: {
+                 "description": "Validation error", "model": Error
+             },
+         }
+         )
 async def put_data(data_id: int, item: Item):
     """Change the selected data"""
     try:
@@ -115,7 +166,7 @@ async def put_data(data_id: int, item: Item):
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
-    logging.info(exc.args[0])
+    logging.error(exc.args[0])
     return JSONResponse(
         status_code=status.HTTP_400_BAD_REQUEST,
         content=jsonable_encoder({'status': 400,

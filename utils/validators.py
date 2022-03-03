@@ -1,13 +1,22 @@
 from typing import Optional, List
 
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
+
 
 class Error(BaseModel):
     status: str
     message: str
 
+
 class Status(BaseModel):
     status: str
+
+
+class SubmitDataResponse(BaseModel):
+    status: str
+    message: str
+    id: str
+
 
 class Coord(BaseModel):
     latitude: str
@@ -28,8 +37,8 @@ class Image(BaseModel):
 
 
 class User(BaseModel):
-    id: Optional[str]
-    email: Optional[str]
+    id: str
+    email: EmailStr
     phone: Optional[str]
     fam: Optional[str]
     name: Optional[str]
@@ -46,4 +55,4 @@ class Item(BaseModel):
     type: str
     level: Level
     user: User
-    images: List[Image] = []
+    images: List[Image]
